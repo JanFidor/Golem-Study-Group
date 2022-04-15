@@ -85,10 +85,12 @@ class SNAKE:
                         screen.blit(self.body_br, block_rect)
 
     def change_snake_direction(self, dir):
+        if game_controller.snake.direction.y == 0:
             if (dir == "u" or dir == "up"):
                 self.direction = Vector2(0,-1)
             if dir == "d" or dir == "down":
                 self.direction = Vector2(0,1)
+        if game_controller.snake.direction.x == 0:        
             if dir == "r" or dir == "right":
                 self.direction = Vector2(1,0)
             if dir == "l" or dir == "left":
@@ -217,17 +219,14 @@ while True:
         if (event.type == SCREEN_UPDATE):
             game_controller.update()
         if (event.type == pygame.KEYDOWN):
-            if game_controller.snake.direction.y == 0:
-                if event.key == pygame.K_UP:
-                    game_controller.snake.change_snake_direction("up")
-                if event.key == pygame.K_DOWN:
-                    game_controller.snake.change_snake_direction("d")
-
-            if game_controller.snake.direction.x == 0:
-                if event.key == pygame.K_RIGHT:
-                    game_controller.snake.change_snake_direction("r")
-                if event.key == pygame.K_LEFT:
-                    game_controller.snake.change_snake_direction("left")
+            if event.key == pygame.K_UP:
+                game_controller.snake.change_snake_direction("up")
+            if event.key == pygame.K_DOWN:
+                game_controller.snake.change_snake_direction("d")
+            if event.key == pygame.K_RIGHT:
+                game_controller.snake.change_snake_direction("r")
+            if event.key == pygame.K_LEFT:
+                game_controller.snake.change_snake_direction("left")
     screen.fill((136, 222, 53))
     game_controller.draw_elements()
     pygame.display.update()
