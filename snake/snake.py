@@ -31,6 +31,7 @@ class SNAKE:
 
         self.head = self.head_right
         self.tail = self.tail_right
+        self.grow = False
 
     def update_head_graphic(self):
         head_direction =  self.body[0] - self.body[1]
@@ -99,17 +100,18 @@ class SNAKE:
             if dir == "l" or dir == "left":
                 self.direction = Vector2(-1,0)
 
-    grow = False
+    #grow = False
 
     def move_snake(self):
-        if self.grow:
-            body_copy = self.body
-            self.grow = False
-        else:
-            body_copy = self.body[:-1]
+        if self.direction != Vector2 (0,0):
+            if self.grow:
+                body_copy = self.body
+                self.grow = False
+            else:
+                body_copy = self.body[:-1]
 
-        body_copy.insert(0, body_copy[0] + self.direction)
-        self.body = body_copy
+            body_copy.insert(0, body_copy[0] + self.direction)
+            self.body = body_copy
 
     def add_block(self):
         self.grow = True
@@ -225,7 +227,7 @@ def main():
         check_collision()
         check_fail()
         count_fitness()
-    
+        
     def draw_elements():
         draw_grass()
         for index, snake in enumerate(snakes):
@@ -248,14 +250,10 @@ def main():
             
             if(snake.body[0] in snake.body[1:]):
                 game_over(index)
-                print("failed check 2")
-                print ([snake.body[0]])
-                print (snake.body)
 
     def game_over(index):
         snakes.pop(index)
         fruits.pop(index)
-        print("gameovered")
 
     def draw_grass():
         grass_color = (136, 202, 53)
