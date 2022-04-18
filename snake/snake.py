@@ -272,7 +272,7 @@ def eval_genomes(genomes, config):
 
     def game_over(index):
         #loose fitness on death - we don't want that
-        ge[index].fitness -= 1
+        ge[index].fitness -= 5
         snakes.pop(index)
         fruits.pop(index)
         ge.pop(index)
@@ -300,10 +300,15 @@ def eval_genomes(genomes, config):
     #     for index, snake in enumerate (snakes):
     #        fitness[index] = len(snake.body) - 3
 
+    run = True
     #game loop
-    while True:
+    while run:
+        if not (len(snakes) > 0):
+            run = False
+            break
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
+                run = False
                 pygame.quit() 
                 sys.exit()
             if (event.type == SCREEN_UPDATE):
@@ -312,6 +317,7 @@ def eval_genomes(genomes, config):
             #user_input = pygame.key.get_pressed()
 
             for index, snake in enumerate(snakes):
+                ge[index].fitness += 0.1 #Snakes get points for staing alive
                 output = nets[index].activate((snake.body[0].x, snake.body[0].y, fruits[index].pos.x, fruits[index].pos.y))
                 if output[0] > 0.5:
                     snake.change_snake_direction("up")
@@ -322,19 +328,23 @@ def eval_genomes(genomes, config):
                 elif output[3] > 0.5:
                     snake.change_snake_direction("left")
 
+
         screen.fill((136, 222, 53))
         draw_elements()
         stats()
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(30)
 
 def run(config_path):
     print("RUN!")
-    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation,
+    config = neat.config.Config(neat.DefaultGenome, 
+                                neat.DefaultReproduction, 
+                                neat.DefaultSpeciesSet, 
+                                neat.DefaultStagnation,
                                 config_path)
     global population
     population = neat.Population(config)
-    population.run(eval_genomes, 3) #evolution (fitness) fuction, how many generations
+    population.run(eval_genomes, 50) #evolution (fitness) fuction, how many generations
 
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
