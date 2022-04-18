@@ -334,7 +334,7 @@ def run(config_path):
                                 config_path)
     global population
     population = neat.Population(config)
-    population.run(eval_genomes, 50) #evolution (fitness) fuction, how many generations
+    population.run(eval_genomes, 3) #evolution (fitness) fuction, how many generations
 
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
