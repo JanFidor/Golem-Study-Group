@@ -1,6 +1,5 @@
 #imports
 import enum
-from textwrap import indent
 import pygame
 import sys
 import random
@@ -29,6 +28,9 @@ class SNAKE:
         
         self.body_vertical = pygame.transform.scale(pygame.image.load("graphics/body_vertical.png").convert_alpha(), (cell_size, cell_size))
         self.body_horizontal = pygame.transform.scale(pygame.image.load("graphics/body_horizontal.png").convert_alpha(), (cell_size, cell_size))
+
+        self.head = self.head_right
+        self.tail = self.tail_right
 
     def update_head_graphic(self):
         head_direction =  self.body[0] - self.body[1]
@@ -86,12 +88,12 @@ class SNAKE:
                         screen.blit(self.body_br, block_rect)
 
     def change_snake_direction(self, dir):
-        if game_controller.snake.direction.y == 0:
+        if self.direction.y == 0:
             if (dir == "u" or dir == "up"):
                 self.direction = Vector2(0,-1)
             if dir == "d" or dir == "down":
                 self.direction = Vector2(0,1)
-        if game_controller.snake.direction.x == 0:        
+        if self.direction.x == 0:        
             if dir == "r" or dir == "right":
                 self.direction = Vector2(1,0)
             if dir == "l" or dir == "left":
@@ -195,23 +197,25 @@ class MAIN:
 #setup & game variables
 pygame.init()
 
-cell_size = 40
-cell_number = 20
-
-screen = pygame.display.set_mode((cell_number * cell_size,cell_number*cell_size))
-
-apple = pygame.transform.scale(pygame.image.load("graphics/Apple0002.png").convert_alpha(), (cell_size, cell_size))
-
-game_font = pygame.font.Font("VT323.ttf", 40)
-
-SCREEN_UPDATE = pygame.USEREVENT
-pygame.time.set_timer(SCREEN_UPDATE, 150)
-
 def main():
+    global cell_size, cell_number, screen, apple, game_font
+    cell_size = 40
+    cell_number = 20
+
+    screen = pygame.display.set_mode((cell_number * cell_size,cell_number*cell_size))
+
+    apple = pygame.transform.scale(pygame.image.load("graphics/Apple0002.png").convert_alpha(), (cell_size, cell_size))
+
+    game_font = pygame.font.Font("VT323.ttf", 40)
+
+    SCREEN_UPDATE = pygame.USEREVENT
+    pygame.time.set_timer(SCREEN_UPDATE, 150)
     clock = pygame.time.Clock()
+    
     #init
     snakes = [SNAKE()]
     fruits = [FRUIT()]
+    fitness = [0 for snake in range(len(snakes))]
     ge = []
     nets = []
     #functions
@@ -220,13 +224,13 @@ def main():
             snake.move_snake()
         check_collision()
         check_fail()
+        count_fitness()
     
     def draw_elements():
         draw_grass()
-        for index, snake in enumerate(snake):
+        for index, snake in enumerate(snakes):
             fruits[index].draw_fruit()
             snake.draw_snake()
-        draw_score()
 
     def check_collision ():
         for index, snake in enumerate(snakes):
@@ -244,12 +248,14 @@ def main():
             
             if(snake.body[0] in snake.body[1:]):
                 game_over(index)
+                print("failed check 2")
+                print ([snake.body[0]])
+                print (snake.body)
 
     def game_over(index):
-        # pygame.quit() 
-        # sys.exit()
         snakes.pop(index)
         fruits.pop(index)
+        print("gameovered")
 
     def draw_grass():
         grass_color = (136, 202, 53)
@@ -266,7 +272,7 @@ def main():
 
     def count_fitness():
         for index, snake in enumerate (snakes):
-           fitness = len(snake.body) - 3
+           fitness[index] = len(snake.body) - 3
 
     #game loop
     while True:
@@ -275,18 +281,21 @@ def main():
                 pygame.quit() 
                 sys.exit()
             if (event.type == SCREEN_UPDATE):
-                game_controller.update()
-            if (event.type == pygame.KEYDOWN):
-                if event.key == pygame.K_UP:
-                    game_controller.snake.change_snake_direction("up")
-                if event.key == pygame.K_DOWN:
-                    game_controller.snake.change_snake_direction("d")
-                if event.key == pygame.K_RIGHT:
-                    game_controller.snake.change_snake_direction("r")
-                if event.key == pygame.K_LEFT:
-                    game_controller.snake.change_snake_direction("left")
+                update()
+            
+            user_input = pygame.key.get_pressed()
+
+            for index, snake in enumerate(snakes):
+                if user_input[pygame.K_UP]:
+                    snake.change_snake_direction("up")
+                if user_input[pygame.K_DOWN]:
+                    snake.change_snake_direction("d")
+                if user_input[pygame.K_RIGHT]:
+                    snake.change_snake_direction("r")
+                if user_input[pygame.K_LEFT]:
+                    snake.change_snake_direction("left")
         screen.fill((136, 222, 53))
-        game_controller.draw_elements()
+        draw_elements()
         pygame.display.update()
         clock.tick(60)
 
