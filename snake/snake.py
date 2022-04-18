@@ -211,12 +211,12 @@ def main():
     game_font = pygame.font.Font("VT323.ttf", 40)
 
     SCREEN_UPDATE = pygame.USEREVENT
-    pygame.time.set_timer(SCREEN_UPDATE, 150)
+    pygame.time.set_timer(SCREEN_UPDATE, 170)
     clock = pygame.time.Clock()
     
     #init
     snakes = [SNAKE()]
-    fruits = [FRUIT()]
+    fruits = [FRUIT(), FRUIT(), FRUIT()]
     fitness = [0 for snake in range(len(snakes))]
     ge = []
     nets = []
@@ -254,6 +254,7 @@ def main():
     def game_over(index):
         snakes.pop(index)
         fruits.pop(index)
+        print (f'{str(index)} has died.')
 
     def draw_grass():
         grass_color = (136, 202, 53)
@@ -281,20 +282,18 @@ def main():
             if (event.type == SCREEN_UPDATE):
                 update()
             
-            user_input = pygame.key.get_pressed()
+            #user_input = pygame.key.get_pressed()
 
             for index, snake in enumerate(snakes):
-                if user_input[pygame.K_UP]:
-                    snake.change_snake_direction("up")
-                if user_input[pygame.K_DOWN]:
-                    snake.change_snake_direction("d")
-                if user_input[pygame.K_RIGHT]:
-                    snake.change_snake_direction("r")
-                if user_input[pygame.K_LEFT]:
-                    snake.change_snake_direction("left")
+                #if index == 0:
+                    
+
         screen.fill((136, 222, 53))
         draw_elements()
         pygame.display.update()
         clock.tick(60)
 
 main()
+
+if __name__ == __main__:
+    
