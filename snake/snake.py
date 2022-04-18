@@ -1,9 +1,11 @@
 #imports
-import enum
 import pygame
 import sys
 import random
 from pygame.math import Vector2
+from sympy import python
+import neat
+import os
 
 #classes
 class SNAKE:
@@ -199,8 +201,8 @@ class MAIN:
 #setup & game variables
 pygame.init()
 
-def main():
-    global cell_size, cell_number, screen, apple, game_font
+def eval_genomes(genomes, config):
+    global cell_size, cell_number, screen, apple, game_font, snakes, fruits, ge, nets
     cell_size = 40
     cell_number = 20
 
@@ -215,19 +217,34 @@ def main():
     clock = pygame.time.Clock()
     
     #init
-    snakes = [SNAKE()]
-    fruits = [FRUIT(), FRUIT(), FRUIT()]
-    fitness = [0 for snake in range(len(snakes))]
+    snakes = []
+    fruits = []
+    #fitness = [0 for snake in range(len(snakes))]
     ge = []
     nets = []
+
+    for genome_id, genome in genomes:
+        snakes.append(SNAKE())
+        fruits.append(FRUIT())
+        ge.append(genome)
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        nets.append(net)
+        genome.fitness = 0
+
     #functions
     def update():
         for snake in snakes:
             snake.move_snake()
         check_collision()
         check_fail()
-        count_fitness()
-        
+        #count_fitness()
+        kill_nonactive()
+
+    def kill_nonactive():
+        for index, snake in enumerate(snakes):
+            if snake.direction == Vector2(0,0):
+                game_over(index)
+                print ("Nonactive - ", end="")
     def draw_elements():
         draw_grass()
         for index, snake in enumerate(snakes):
@@ -238,6 +255,8 @@ def main():
         for index, snake in enumerate(snakes):
             fruit = fruits[index]
             if fruit.pos == snake.body[0]:
+                #this snake just got better!
+                ge[index].fitness += 1
                 fruit.randomize()
                 snake.add_block()
                 while fruit.pos in snake.body:
@@ -252,9 +271,13 @@ def main():
                 game_over(index)
 
     def game_over(index):
+        #loose fitness on death - we don't want that
+        ge[index].fitness -= 1
         snakes.pop(index)
         fruits.pop(index)
-        print (f'{str(index)} has died.')
+        ge.pop(index)
+        nets.pop(index)
+        print (f'{str(index)} has died. Snakes left: {len(snakes)}')
 
     def draw_grass():
         grass_color = (136, 202, 53)
@@ -269,9 +292,13 @@ def main():
                     grass_rect = pygame.Rect(col * cell_size, row * cell_size,cell_size, cell_size)
                     pygame.draw.rect(screen, grass_color, grass_rect)
 
-    def count_fitness():
-        for index, snake in enumerate (snakes):
-           fitness[index] = len(snake.body) - 3
+    def stats():
+        text_1 = game_font.render(f'Generation: {population.generation}', True, (0,0,0))
+        screen.blit(text_1, ((cell_number-6)*cell_size, (cell_number-2)*cell_size))
+
+    # def count_fitness():
+    #     for index, snake in enumerate (snakes):
+    #        fitness[index] = len(snake.body) - 3
 
     #game loop
     while True:
@@ -285,15 +312,31 @@ def main():
             #user_input = pygame.key.get_pressed()
 
             for index, snake in enumerate(snakes):
-                #if index == 0:
-                    
+                output = nets[index].activate((snake.body[0].x, snake.body[0].y, fruits[index].pos.x, fruits[index].pos.y))
+                if output[0] > 0.5:
+                    snake.change_snake_direction("up")
+                elif output[1] > 0.5:
+                    snake.change_snake_direction("d")
+                if output[2] > 0.5:
+                    snake.change_snake_direction("r")
+                elif output[3] > 0.5:
+                    snake.change_snake_direction("left")
 
         screen.fill((136, 222, 53))
         draw_elements()
+        stats()
         pygame.display.update()
         clock.tick(60)
 
-main()
+def run(config_path):
+    print("RUN!")
+    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                config_path)
+    global population
+    population = neat.Population(config)
+    population.run(eval_genomes, 50) #evolution (fitness) fuction, how many generations
 
-if __name__ == __main__:
-    
+if __name__ == '__main__':
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config.txt")
+    run(config_path)
