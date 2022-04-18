@@ -1,6 +1,4 @@
 #imports
-import enum
-from textwrap import indent
 import pygame
 import sys
 import random
@@ -120,6 +118,7 @@ class FRUIT:
     def __init__(self):
         self.randomize()
 
+
     def draw_fruit(self):
         fruit_rect = pygame.Rect(int(self.pos.x * cell_size),int(self.pos.y * cell_size),cell_size,cell_size)
         #drawin fruit as a red square:
@@ -153,9 +152,8 @@ class MAIN:
             self.fruit.randomize()
             self.snake.add_block()
 
-        for block in self.snake.body[1:]:
-            if block == self.fruit.pos:
-                self.fruit.randomize()
+        while self.fruit.pos in self.snake.body:
+            self.fruit.randomize()
 
     def check_fail(self):
         if (not 0 <= self.snake.body[0].x < cell_number) or (not 0 <= self.snake.body[0].y < cell_number):
@@ -199,6 +197,7 @@ cell_size = 40
 cell_number = 20
 
 screen = pygame.display.set_mode((cell_number * cell_size,cell_number*cell_size))
+clock = pygame.time.Clock()
 
 apple = pygame.transform.scale(pygame.image.load("graphics/Apple0002.png").convert_alpha(), (cell_size, cell_size))
 
@@ -207,87 +206,26 @@ game_font = pygame.font.Font("VT323.ttf", 40)
 SCREEN_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SCREEN_UPDATE, 150)
 
-def main():
-    clock = pygame.time.Clock()
-    #init
-    snakes = [SNAKE()]
-    fruits = [FRUIT()]
-    ge = []
-    nets = []
-    #functions
-    def update():
-        for snake in snakes:
-            snake.move_snake()
-        check_collision()
-        check_fail()
-    
-    def draw_elements():
-        draw_grass()
-        for index, snake in enumerate(snake):
-            fruits[index].draw_fruit()
-            snake.draw_snake()
-        draw_score()
+game_controller = MAIN()
 
-    def check_collision ():
-        for index, snake in enumerate(snakes):
-            fruit = fruits[index]
-            if fruit.pos == snake.body[0]:
-                fruit.randomize()
-                snake.add_block()
-                while fruit.pos in snake.body:
-                    fruit.randomize()
-
-    def check_fail():
-        for index, snake in enumerate(snakes):
-            if (not 0 <= snake.body[0].x < cell_number) or (not 0 <= snake.body[0].y < cell_number):
-                game_over(index)
-            
-            if(snake.body[0] in snake.body[1:]):
-                game_over(index)
-
-    def game_over(index):
-        # pygame.quit() 
-        # sys.exit()
-        snakes.pop(index)
-        fruits.pop(index)
-
-    def draw_grass():
-        grass_color = (136, 202, 53)
-
-        modifier = 0
-        for row in range(cell_number):
-            if row % 2 == 0: modifier = 0
-            else: modifier = 1
-
-            for col in range(cell_number):
-                if (col + modifier) % 2 == 0:
-                    grass_rect = pygame.Rect(col * cell_size, row * cell_size,cell_size, cell_size)
-                    pygame.draw.rect(screen, grass_color, grass_rect)
-
-    def count_fitness():
-        for index, snake in enumerate (snakes):
-           fitness = len(snake.body) - 3
-
-    #game loop
-    while True:
-        for event in pygame.event.get():
-            if (event.type == pygame.QUIT):
-                pygame.quit() 
-                sys.exit()
-            if (event.type == SCREEN_UPDATE):
-                game_controller.update()
-            if (event.type == pygame.KEYDOWN):
-                if event.key == pygame.K_UP:
-                    game_controller.snake.change_snake_direction("up")
-                if event.key == pygame.K_DOWN:
-                    game_controller.snake.change_snake_direction("d")
-                if event.key == pygame.K_RIGHT:
-                    game_controller.snake.change_snake_direction("r")
-                if event.key == pygame.K_LEFT:
-                    game_controller.snake.change_snake_direction("left")
-        screen.fill((136, 222, 53))
-        game_controller.draw_elements()
-        pygame.display.update()
-        clock.tick(60)
-
-main()
+#game loop
+while True:
+    for event in pygame.event.get():
+        if (event.type == pygame.QUIT):
+            pygame.quit() 
+            sys.exit()
+        if (event.type == SCREEN_UPDATE):
+            game_controller.update()
+        if (event.type == pygame.KEYDOWN):
+            if event.key == pygame.K_UP:
+                game_controller.snake.change_snake_direction("up")
+            if event.key == pygame.K_DOWN:
+                game_controller.snake.change_snake_direction("d")
+            if event.key == pygame.K_RIGHT:
+                game_controller.snake.change_snake_direction("r")
+            if event.key == pygame.K_LEFT:
+                game_controller.snake.change_snake_direction("left")
+    screen.fill((136, 222, 53))
+    game_controller.draw_elements()
+    pygame.display.update()
+    clock.tick(60)
