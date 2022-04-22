@@ -9,27 +9,27 @@ import os
 
 #classes
 class SNAKE:
-    def __init__(self):
+    def __init__(self, path):
         self.body = [Vector2(5,10),Vector2(4,10),Vector2(3,10)]
         self.direction = Vector2(0,0)
 
-        self.head_up = pygame.transform.scale(pygame.image.load("graphics/head_up.png").convert_alpha(), (cell_size, cell_size))
-        self.head_down = pygame.transform.scale(pygame.image.load("graphics/head_down.png").convert_alpha(), (cell_size, cell_size))
-        self.head_right = pygame.transform.scale(pygame.image.load("graphics/head_right.png").convert_alpha(), (cell_size, cell_size))
-        self.head_left = pygame.transform.scale(pygame.image.load("graphics/head_left.png").convert_alpha(), (cell_size, cell_size))
+        self.head_up = pygame.transform.scale(pygame.image.load(path + "\graphics\head_up.png").convert_alpha(), (cell_size, cell_size))
+        self.head_down = pygame.transform.scale(pygame.image.load(path + "\graphics\head_down.png").convert_alpha(), (cell_size, cell_size))
+        self.head_right = pygame.transform.scale(pygame.image.load(path + "\graphics\head_right.png").convert_alpha(), (cell_size, cell_size))
+        self.head_left = pygame.transform.scale(pygame.image.load(path + "\graphics\head_left.png").convert_alpha(), (cell_size, cell_size))
         
-        self.tail_up = pygame.transform.scale(pygame.image.load("graphics/tail_up.png").convert_alpha(), (cell_size, cell_size))
-        self.tail_down = pygame.transform.scale(pygame.image.load("graphics/tail_down.png").convert_alpha(), (cell_size, cell_size))
-        self.tail_right = pygame.transform.scale(pygame.image.load("graphics/tail_right.png").convert_alpha(), (cell_size, cell_size))
-        self.tail_left = pygame.transform.scale(pygame.image.load("graphics/tail_left.png").convert_alpha(), (cell_size, cell_size))
+        self.tail_up = pygame.transform.scale(pygame.image.load(path + "\graphics\\tail_up.png").convert_alpha(), (cell_size, cell_size))
+        self.tail_down = pygame.transform.scale(pygame.image.load(path + "\graphics\\tail_down.png").convert_alpha(), (cell_size, cell_size))
+        self.tail_right = pygame.transform.scale(pygame.image.load(path + "\graphics\\tail_right.png").convert_alpha(), (cell_size, cell_size))
+        self.tail_left = pygame.transform.scale(pygame.image.load(path + "\graphics\\tail_left.png").convert_alpha(), (cell_size, cell_size))
         
-        self.body_tr = pygame.transform.scale(pygame.image.load("graphics/body_tr.png").convert_alpha(), (cell_size, cell_size))
-        self.body_tl = pygame.transform.scale(pygame.image.load("graphics/body_tl.png").convert_alpha(), (cell_size, cell_size))
-        self.body_br = pygame.transform.scale(pygame.image.load("graphics/body_br.png").convert_alpha(), (cell_size, cell_size))
-        self.body_bl = pygame.transform.scale(pygame.image.load("graphics/body_bl.png").convert_alpha(), (cell_size, cell_size))
+        self.body_tr = pygame.transform.scale(pygame.image.load(path + "\graphics\\body_tr.png").convert_alpha(), (cell_size, cell_size))
+        self.body_tl = pygame.transform.scale(pygame.image.load(path + "\graphics\\body_tl.png").convert_alpha(), (cell_size, cell_size))
+        self.body_br = pygame.transform.scale(pygame.image.load(path + "\graphics\\body_br.png").convert_alpha(), (cell_size, cell_size))
+        self.body_bl = pygame.transform.scale(pygame.image.load(path + "\graphics\\body_bl.png").convert_alpha(), (cell_size, cell_size))
         
-        self.body_vertical = pygame.transform.scale(pygame.image.load("graphics/body_vertical.png").convert_alpha(), (cell_size, cell_size))
-        self.body_horizontal = pygame.transform.scale(pygame.image.load("graphics/body_horizontal.png").convert_alpha(), (cell_size, cell_size))
+        self.body_vertical = pygame.transform.scale(pygame.image.load(path + "\graphics\\body_vertical.png").convert_alpha(), (cell_size, cell_size))
+        self.body_horizontal = pygame.transform.scale(pygame.image.load(path + "\graphics\\body_horizontal.png").convert_alpha(), (cell_size, cell_size))
 
         self.head = self.head_right
         self.tail = self.tail_right
@@ -207,10 +207,10 @@ def eval_genomes(genomes, config):
     cell_number = 20
 
     screen = pygame.display.set_mode((cell_number * cell_size,cell_number*cell_size))
+    path = os.path.join(os.path.dirname(__file__))
+    apple = pygame.transform.scale(pygame.image.load(path + "\graphics\Apple0002.png").convert_alpha(), (cell_size, cell_size))
 
-    apple = pygame.transform.scale(pygame.image.load("graphics/Apple0002.png").convert_alpha(), (cell_size, cell_size))
-
-    game_font = pygame.font.Font("VT323.ttf", 40)
+    game_font = pygame.font.Font(path + "\VT323.ttf", 40)
 
     SCREEN_UPDATE = pygame.USEREVENT
     pygame.time.set_timer(SCREEN_UPDATE, 170)
@@ -224,7 +224,7 @@ def eval_genomes(genomes, config):
     nets = []
 
     for genome_id, genome in genomes:
-        snakes.append(SNAKE())
+        snakes.append(SNAKE(path))
         fruits.append(FRUIT())
         ge.append(genome)
         net = neat.nn.FeedForwardNetwork.create(genome, config)
